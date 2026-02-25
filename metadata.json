@@ -1,0 +1,5 @@
+{
+  "name": "Madison Site Surveyor",
+  "description": "Professional-grade field application for industrial mechanical room and commercial roof data capture.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"]
+}
