@@ -345,7 +345,7 @@ export default function App() {
         "Sub Panels": "11335892637"
       };
       
-      const existingItemId = subcategoryIdMap[subcategory];
+      const subcategoryItemId = subcategoryIdMap[subcategory];
       
       // Naming convention for the update header
       const detail = record.type === 'ISC' 
@@ -359,17 +359,20 @@ export default function App() {
         text: JSON.stringify(record.data)
       };
       
-      // If we found an existing item ID, we post directly to it as an update
-      // Otherwise, we fall back to creating a new subitem under the category
-      const parentMap: Record<string, string> = {
+      // Map Categories to Parent Item IDs
+      const categoryParentMap: Record<string, string> = {
         'HVAC': '11335890913',
         'Cold Storage': '11335883222',
         'Roofing': '11335890908',
         'Electrical': '11335891044'
       };
-      const parentItemId = parentMap[category];
 
-      await pushToMonday(itemName, columnValues, record.boardId, record.notes, record.images, parentItemId, existingItemId);
+      // Direct to subcategory item if found, otherwise use category parent
+      const parentItemId = subcategoryItemId || categoryParentMap[category];
+
+      // We always create a new subitem under the identified parent to ensure
+      // images and AI output are associated with a fresh record.
+      await pushToMonday(itemName, columnValues, record.boardId, record.notes, record.images, parentItemId);
       
       // Also update Google Sheet if connected
       if (googleConnected && spreadsheetId) {
