@@ -425,8 +425,8 @@ async function startServer() {
 
         // Upload images to the update if provided
         if (images && Array.isArray(images) && images.length > 0 && updateId) {
-          for (let i = 0; i < images.length; i++) {
-            const image = images[i];
+          // BOLT OPTIMIZATION: Upload images in parallel using Promise.all to reduce sync time from O(N) to O(1) concurrent
+          const uploadPromises = images.map(async (image, i) => {
             try {
               // Convert base64 to Buffer
               const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
@@ -441,17 +441,24 @@ async function startServer() {
               const blob = new Blob([buffer], { type: 'image/jpeg' });
               formData.append('variables[file]', blob, `survey_image_${i + 1}.jpg`);
 
-              await fetch("https://api.monday.com/v2/file", {
+              const imgResponse = await fetch("https://api.monday.com/v2/file", {
                 method: "POST",
                 headers: {
                   "Authorization": MONDAY_API_KEY
                 },
                 body: formData
               });
+
+              if (!imgResponse.ok) {
+                const errData = await imgResponse.json();
+                throw new Error(errData.errors?.[0]?.message || "File upload failed");
+              }
             } catch (imgErr) {
               console.error(`Image ${i + 1} upload failed:`, imgErr);
             }
-          }
+          });
+
+          await Promise.all(uploadPromises);
         }
       }
 
