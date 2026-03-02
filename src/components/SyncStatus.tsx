@@ -7,7 +7,8 @@ interface SyncStatusProps {
   pendingCount: number;
 }
 
-export const SyncStatus: React.FC<SyncStatusProps> = ({ isOnline, pendingCount }) => {
+// BOLT OPTIMIZATION: Memoize status indicator to prevent re-renders when parent app state changes unrelatedly
+export const SyncStatus: React.FC<SyncStatusProps> = React.memo(({ isOnline, pendingCount }) => {
   return (
     <div className="flex items-center gap-3 px-4 py-2 bg-zinc-900/50 rounded-full border border-zinc-800 backdrop-blur-sm">
       {isOnline ? (
@@ -33,4 +34,4 @@ export const SyncStatus: React.FC<SyncStatusProps> = ({ isOnline, pendingCount }
       </div>
     </div>
   );
-};
+});
