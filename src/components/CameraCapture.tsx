@@ -63,7 +63,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      Array.from(files).forEach(file => {
+      Array.from(files).forEach((file: File) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           onCapture(reader.result as string);
