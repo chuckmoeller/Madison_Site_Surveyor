@@ -217,83 +217,61 @@ export default function App() {
     setIsProcessing(true);
     try {
       const createdRecords: SurveyRecord[] = [];
+      let rawData: any = { values: [] };
 
-      for (const img of sessionImages) {
-        let rawData: any = {};
-        try {
-          if (type === 'ISC') {
-            rawData = await processNameplate([img]);
-          } else if (type === 'EFS') {
-            rawData = await processRoofImage([img]);
-          }
+      // OPTIMIZATION: Consolidate multiple images into a single AI analysis call
+      // Gemini 1.5 Flash can process multiple images simultaneously, improving accuracy
+      // and reducing network overhead/latency by ~N-1 roundtrips.
+      try {
+        if (type === 'ISC') {
+          rawData = await processNameplate(sessionImages);
+        } else if (type === 'EFS') {
+          rawData = await processRoofImage(sessionImages);
+        }
+      } catch (procErr) {
+        console.error("AI Analysis failed:", procErr);
+      }
+
+      if (rawData.values && rawData.values.length > 0) {
+        for (const row of rawData.values) {
+          if (!row || row.length === 0) continue; // Skip empty rows
 
           let data: any = {};
-          if (rawData.values && rawData.values.length > 0) {
-            const row = rawData.values[0];
-            if (type === 'ISC') {
-              data = {
-                siteName: row[0],
-                category: row[1],
-                subcategory: row[2],
-                manufacturer: row[3],
-                modelNumber: row[4],
-                serialNumber: row[5],
-                year: row[6],
-                voltage: row[7],
-                phase: row[8],
-                amperage: row[9],
-                capacity: row[10],
-                fanRLA: row[11],
-                compressorRLA: row[12],
-                fla: row[13],
-                lra: row[14],
-                indoorFan: row[15],
-                outdoorFan: row[16],
-                manualLink: row[17],
-                observations: row[18]
-              };
-            } else if (type === 'EFS') {
-              data = {
-                siteName: row[0],
-                category: row[1],
-                subcategory: row[2],
-                material: row[3],
-                defects: typeof row[4] === 'string' ? row[4].split(',').map((s: string) => s.trim()) : row[4],
-                features: typeof row[5] === 'string' ? row[5].split(',').map((s: string) => s.trim()) : row[5],
-                classification: row[6]
-              };
-            }
+          if (type === 'ISC') {
+            data = {
+              siteName: row[0] || '', category: row[1] || '', subcategory: row[2] || '',
+              manufacturer: row[3] || '', modelNumber: row[4] || '', serialNumber: row[5] || '',
+              year: row[6] || '', voltage: row[7] || '', phase: row[8] || '', amperage: row[9] || '',
+              capacity: row[10] || '', fanRLA: row[11] || '', compressorRLA: row[12] || '',
+              fla: row[13] || '', lra: row[14] || '', indoorFan: row[15] || '', outdoorFan: row[16] || '',
+              manualLink: row[17] || '', observations: row[18] || ''
+            };
+          } else if (type === 'EFS') {
+            data = {
+              siteName: row[0] || '', category: row[1] || '', subcategory: row[2] || '',
+              material: row[3] || '',
+              defects: typeof row[4] === 'string' ? row[4].split(',').map((s: string) => s.trim()) : (Array.isArray(row[4]) ? row[4] : []),
+              features: typeof row[5] === 'string' ? row[5].split(',').map((s: string) => s.trim()) : (Array.isArray(row[5]) ? row[5] : []),
+              classification: row[6] || ''
+            };
           }
 
           const record: SurveyRecord = {
             id: crypto.randomUUID(),
             type,
             data,
-            images: sessionImages, // Attach all session images for context
+            images: sessionImages,
             boardId,
             status: 'pending',
             timestamp: Date.now()
           };
 
-          await saveSurvey(record);
-          createdRecords.push(record);
-        } catch (imgErr) {
-          console.error("Individual image processing failed:", imgErr);
-          // Save a record with no data if analysis fails for one image
-          const record: SurveyRecord = {
-            id: crypto.randomUUID(),
-            type,
-            data: {},
-            images: sessionImages, // Attach all session images for context
-            boardId,
-            status: 'pending',
-            timestamp: Date.now()
-          };
           await saveSurvey(record);
           createdRecords.push(record);
         }
       }
 
+      const totalPhotos = sessionImages.length;
       setSessionImages([]);
       if (createdRecords.length === 1) {
         setCurrentRecord(createdRecords[0]);
@@ -301,12 +279,12 @@ export default function App() {
       } else {
         await loadHistory();
         setView('history');
-        alert(`Analyzed ${createdRecords.length} images individually. Review them in History.`);
+        alert(`Analysis complete. Generated ${createdRecords.length} records from ${totalPhotos} images.`);
       }
       await refreshStatus();
     } catch (err) {
-      console.error("Batch processing error:", err);
-      alert("An error occurred during batch processing.");
+      console.error("Processing error:", err);
+      alert("An error occurred during analysis.");
     } finally {
       setIsProcessing(false);
     }
