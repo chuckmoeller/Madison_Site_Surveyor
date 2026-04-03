@@ -425,6 +425,7 @@ export default function App() {
                 </div>
                 <button 
                   onClick={checkGoogleStatus}
+                  aria-label="Retry Google connection check"
                   className="p-1 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
                   title="Retry connection check"
                 >
@@ -460,7 +461,7 @@ export default function App() {
               <div className="space-y-4">
                 <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Monday Job Board ID</label>
+                    <label htmlFor="board-id" className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Monday Job Board ID</label>
                     <div className="flex gap-2 items-center">
                       {serverConfig.hasApiKey ? (
                         <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1"><CheckCircle className="w-2 h-2" /> API LINKED</span>
@@ -469,6 +470,7 @@ export default function App() {
                           <span className="text-[10px] text-red-500 font-bold flex items-center gap-1"><AlertCircle className="w-2 h-2" /> NO API KEY</span>
                           <button 
                             onClick={checkConfig}
+                            aria-label="Refresh API connection"
                             className="p-1 hover:bg-zinc-800 rounded transition-colors"
                             title="Refresh Connection"
                           >
@@ -481,6 +483,7 @@ export default function App() {
                   </div>
                   <div className="relative">
                     <input 
+                      id="board-id"
                       type="text" 
                       value={boardId}
                       onChange={(e) => setBoardId(e.target.value)}
@@ -588,6 +591,7 @@ export default function App() {
                         <img src={img} alt={`Capture ${i}`} className="w-full h-full object-cover" />
                         <button 
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
+                          aria-label={`Remove photo ${i + 1}`}
                           className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
                         >
                           <X className="w-3 h-3" />
