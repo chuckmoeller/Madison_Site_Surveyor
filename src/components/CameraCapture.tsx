@@ -10,6 +10,7 @@ interface CameraCaptureProps {
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, captureCount = 0 }) => {
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +48,9 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         onCapture(dataUrl);
+
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 150);
         // Don't stop camera, allow multiple photos
       }
     }
@@ -109,22 +113,32 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         </div>
       ) : (
         <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            className="flex-1 object-cover"
-          />
+          <div className="relative flex-1 flex flex-col">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="flex-1 object-cover"
+            />
+            <motion.div
+              className="absolute inset-0 bg-white z-10 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: showFlash ? 0.8 : 0 }}
+              transition={{ duration: 0.1 }}
+            />
+          </div>
           <div className="p-8 bg-zinc-900 flex justify-between items-center">
             <button 
               onClick={stopCamera}
               className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm"
+              aria-label={captureCount > 0 ? `Finish capture (${captureCount} photos)` : "Cancel capture"}
             >
               {captureCount > 0 ? `Finish (${captureCount})` : 'Cancel'}
             </button>
             <button
               onClick={takePhoto}
               className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform"
+              aria-label="Capture photo"
             />
             <div className="w-16" /> {/* Spacer */}
           </div>
