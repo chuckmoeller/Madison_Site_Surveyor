@@ -10,6 +10,7 @@ interface CameraCaptureProps {
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, captureCount = 0 }) => {
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +48,8 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         onCapture(dataUrl);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 150);
         // Don't stop camera, allow multiple photos
       }
     }
@@ -115,15 +118,27 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
             playsInline 
             className="flex-1 object-cover"
           />
+          <AnimatePresence>
+            {showFlash && (
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="absolute inset-0 bg-white z-10 pointer-events-none"
+              />
+            )}
+          </AnimatePresence>
           <div className="p-8 bg-zinc-900 flex justify-between items-center">
             <button 
               onClick={stopCamera}
+              aria-label={captureCount > 0 ? "Stop camera and finish" : "Cancel and stop camera"}
               className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm"
             >
-              {captureCount > 0 ? `Finish (${captureCount})` : 'Cancel'}
+              {captureCount > 0 ? `Finish (${captureCount} ${captureCount === 1 ? 'Photo' : 'Photos'})` : 'Cancel'}
             </button>
             <button
               onClick={takePhoto}
+              aria-label="Take photo"
               className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform"
             />
             <div className="w-16" /> {/* Spacer */}
