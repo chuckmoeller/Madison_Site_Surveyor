@@ -427,6 +427,7 @@ export default function App() {
                   onClick={checkGoogleStatus}
                   className="p-1 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
                   title="Retry connection check"
+                  aria-label="Retry connection check"
                 >
                   <RefreshCw className="w-3 h-3" />
                 </button>
@@ -460,7 +461,7 @@ export default function App() {
               <div className="space-y-4">
                 <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Monday Job Board ID</label>
+                    <label htmlFor="board-id" className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Monday Job Board ID</label>
                     <div className="flex gap-2 items-center">
                       {serverConfig.hasApiKey ? (
                         <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1"><CheckCircle className="w-2 h-2" /> API LINKED</span>
@@ -471,6 +472,7 @@ export default function App() {
                             onClick={checkConfig}
                             className="p-1 hover:bg-zinc-800 rounded transition-colors"
                             title="Refresh Connection"
+                            aria-label="Refresh Connection"
                           >
                             <RefreshCw className="w-3 h-3 text-zinc-500" />
                           </button>
@@ -481,6 +483,7 @@ export default function App() {
                   </div>
                   <div className="relative">
                     <input 
+                      id="board-id"
                       type="text" 
                       value={boardId}
                       onChange={(e) => setBoardId(e.target.value)}
@@ -574,7 +577,7 @@ export default function App() {
               {sessionImages.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({sessionImages.length})</span>
+                    <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured {sessionImages.length === 1 ? 'Photo' : 'Photos'} ({sessionImages.length})</span>
                     <button 
                       onClick={() => setSessionImages([])}
                       className="text-[10px] text-red-500 hover:underline"
@@ -589,6 +592,7 @@ export default function App() {
                         <button 
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
                           className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
+                          aria-label="Remove photo"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -604,12 +608,12 @@ export default function App() {
                     {isProcessing ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Analyzing {sessionImages.length} Photos...</span>
+                        <span>Analyzing {sessionImages.length} {sessionImages.length === 1 ? 'Photo' : 'Photos'}...</span>
                       </>
                     ) : (
                       <>
                         <CheckCircle className="w-5 h-5" />
-                        <span>Analyze {sessionImages.length} Photos</span>
+                        <span>Analyze {sessionImages.length} {sessionImages.length === 1 ? 'Photo' : 'Photos'}</span>
                       </>
                     )}
                   </button>
@@ -642,7 +646,7 @@ export default function App() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({currentRecord.images?.length || 0})</span>
+                  <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured {currentRecord.images?.length === 1 ? 'Photo' : 'Photos'} ({currentRecord.images?.length || 0})</span>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 snap-x">
                   {currentRecord.images?.map((img, i) => (
@@ -749,8 +753,9 @@ export default function App() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Field Notes (Optional - Syncs as Comment)</label>
+                    <label htmlFor="field-notes" className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Field Notes (Optional - Syncs as Comment)</label>
                     <textarea 
+                      id="field-notes"
                       value={currentRecord.notes || ''}
                       onChange={(e) => {
                         const updated = { ...currentRecord, notes: e.target.value };
