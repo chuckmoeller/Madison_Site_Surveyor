@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, RefreshCw, Check, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -10,9 +10,19 @@ interface CameraCaptureProps {
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, captureCount = 0 }) => {
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const flashTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (flashTimerRef.current) {
+        clearTimeout(flashTimerRef.current);
+      }
+    };
+  }, []);
 
   const startCamera = async () => {
     setIsCapturing(true);
@@ -47,7 +57,11 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         onCapture(dataUrl);
-        // Don't stop camera, allow multiple photos
+
+        // Visual flash feedback
+        setShowFlash(true);
+        if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+        flashTimerRef.current = setTimeout(() => setShowFlash(false), 150);
       }
     }
   };
@@ -68,7 +82,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         reader.onloadend = () => {
           onCapture(reader.result as string);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(file as Blob);
       });
     }
   };
@@ -90,6 +104,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
           <button
             onClick={startCamera}
             className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-emerald-500/50 transition-colors group active:scale-95"
+            aria-label="Open live camera"
           >
             <div className="p-4 bg-zinc-800 rounded-full group-hover:bg-emerald-500/10 transition-colors">
               <Camera className="w-8 h-8 text-zinc-400 group-hover:text-emerald-500" />
@@ -100,6 +115,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
           <button
             onClick={() => fileInputRef.current?.click()}
             className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-colors group active:scale-95"
+            aria-label="Upload images from gallery"
           >
             <div className="p-4 bg-zinc-800 rounded-full group-hover:bg-blue-500/10 transition-colors">
               <ImageIcon className="w-8 h-8 text-zinc-400 group-hover:text-blue-500" />
@@ -115,16 +131,31 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
             playsInline 
             className="flex-1 object-cover"
           />
-          <div className="p-8 bg-zinc-900 flex justify-between items-center">
+
+          <AnimatePresence>
+            {showFlash && (
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="absolute inset-0 bg-white z-[60] pointer-events-none"
+              />
+            )}
+          </AnimatePresence>
+
+          <div className="p-8 bg-zinc-900 flex justify-between items-center relative z-50">
             <button 
               onClick={stopCamera}
               className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm"
+              aria-label={captureCount > 0 ? `Finish and save ${captureCount} photos` : "Cancel and close camera"}
             >
               {captureCount > 0 ? `Finish (${captureCount})` : 'Cancel'}
             </button>
             <button
               onClick={takePhoto}
               className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform"
+              aria-label="Take photo"
             />
             <div className="w-16" /> {/* Spacer */}
           </div>
