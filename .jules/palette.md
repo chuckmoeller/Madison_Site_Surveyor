@@ -1,0 +1,3 @@
+## 2025-05-14 - Camera Feedback and Accessibility Enhancement
+**Learning:** For mobile-first capture applications, immediate visual feedback (like a shutter flash) is critical to signify successful action, especially when the UI doesn't immediately change view. Additionally, explicit label association and descriptive ARIA labels for icon-only buttons significantly improve the navigation experience for screen reader users.
+**Action:** Always implement a brief (150ms) visual confirmation for capture events and ensure all form inputs have `htmlFor`/`id` associations and all icon buttons have `aria-label`.
