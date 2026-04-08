@@ -216,9 +216,8 @@ export default function App() {
     
     setIsProcessing(true);
     try {
-      const createdRecords: SurveyRecord[] = [];
-
-      for (const img of sessionImages) {
+      // Parallelize image processing to improve performance and fix O(N^2) storage issue
+      const createdRecords = await Promise.all(sessionImages.map(async (img) => {
         let rawData: any = {};
         try {
           if (type === 'ISC') {
@@ -269,14 +268,14 @@ export default function App() {
             id: crypto.randomUUID(),
             type,
             data,
-            images: sessionImages, // Attach all session images for context
+            images: [img], // Fixed: Only store the specific image for this record
             boardId,
             status: 'pending',
             timestamp: Date.now()
           };
 
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         } catch (imgErr) {
           console.error("Individual image processing failed:", imgErr);
           // Save a record with no data if analysis fails for one image
@@ -284,15 +283,15 @@ export default function App() {
             id: crypto.randomUUID(),
             type,
             data: {},
-            images: sessionImages, // Attach all session images for context
+            images: [img], // Fixed: Only store the specific image for this record
             boardId,
             status: 'pending',
             timestamp: Date.now()
           };
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         }
-      }
+      }));
 
       setSessionImages([]);
       if (createdRecords.length === 1) {
