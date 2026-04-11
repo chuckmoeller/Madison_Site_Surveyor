@@ -425,8 +425,8 @@ async function startServer() {
 
         // Upload images to the update if provided
         if (images && Array.isArray(images) && images.length > 0 && updateId) {
-          for (let i = 0; i < images.length; i++) {
-            const image = images[i];
+          // Bolt ⚡: Parallelized image uploads to Monday.com to reduce latency
+          await Promise.all(images.map(async (image, i) => {
             try {
               // Convert base64 to Buffer
               const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
@@ -451,7 +451,7 @@ async function startServer() {
             } catch (imgErr) {
               console.error(`Image ${i + 1} upload failed:`, imgErr);
             }
-          }
+          }));
         }
       }
 

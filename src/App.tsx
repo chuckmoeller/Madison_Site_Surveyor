@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Shield, 
@@ -216,9 +216,8 @@ export default function App() {
     
     setIsProcessing(true);
     try {
-      const createdRecords: SurveyRecord[] = [];
-
-      for (const img of sessionImages) {
+      // Bolt ⚡: Parallelized image analysis to reduce wait time from O(N) to O(max(latency))
+      const createdRecords = await Promise.all(sessionImages.map(async (img) => {
         let rawData: any = {};
         try {
           if (type === 'ISC') {
@@ -276,7 +275,7 @@ export default function App() {
           };
 
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         } catch (imgErr) {
           console.error("Individual image processing failed:", imgErr);
           // Save a record with no data if analysis fails for one image
@@ -290,9 +289,9 @@ export default function App() {
             timestamp: Date.now()
           };
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         }
-      }
+      }));
 
       setSessionImages([]);
       if (createdRecords.length === 1) {
@@ -372,20 +371,24 @@ export default function App() {
 
       // We always create a new subitem under the identified parent to ensure
       // images and AI output are associated with a fresh record.
-      await pushToMonday(itemName, columnValues, record.boardId, record.notes, record.images, parentItemId);
-      
-      // Also update Google Sheet if connected
-      if (googleConnected && spreadsheetId) {
-        try {
-          await fetch('/api/google/update-sheet', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spreadsheetId, record })
-          });
-        } catch (gErr) {
-          console.error("Google Sheet update failed", gErr);
-        }
-      }
+      // Bolt ⚡: Parallelized Monday.com push and Google Sheets update
+      await Promise.all([
+        pushToMonday(itemName, columnValues, record.boardId, record.notes, record.images, parentItemId),
+        (async () => {
+          // Also update Google Sheet if connected
+          if (googleConnected && spreadsheetId) {
+            try {
+              await fetch('/api/google/update-sheet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ spreadsheetId, record })
+              });
+            } catch (gErr) {
+              console.error("Google Sheet update failed", gErr);
+            }
+          }
+        })()
+      ]);
 
       await markAsSynced(record.id);
       await refreshStatus();
@@ -919,7 +922,7 @@ export default function App() {
   );
 }
 
-function ModuleButton({ icon, title, description, onClick, color, disabled, loading }: any) {
+const ModuleButton = memo(function ModuleButton({ icon, title, description, onClick, color, disabled, loading }: any) {
   const colors = {
     emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500/20",
     blue: "bg-blue-500/10 border-blue-500/20 text-blue-500 group-hover:bg-blue-500/20",
@@ -948,7 +951,7 @@ function ModuleButton({ icon, title, description, onClick, color, disabled, load
   );
 }
 
-function DataField({ label, value }: { label: string, value?: string }) {
+const DataField = memo(function DataField({ label, value }: { label: string, value?: string }) {
   return (
     <div className="space-y-1">
       <span className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">{label}</span>
