@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, RefreshCw, Check, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -10,6 +10,8 @@ interface CameraCaptureProps {
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, captureCount = 0 }) => {
   const [isCapturing, setIsCapturing] = useState(false);
+  const [showShutter, setShowShutter] = useState(false);
+  const shutterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,10 +49,19 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         onCapture(dataUrl);
-        // Don't stop camera, allow multiple photos
+
+        if (shutterTimerRef.current) clearTimeout(shutterTimerRef.current);
+        setShowShutter(true);
+        shutterTimerRef.current = setTimeout(() => setShowShutter(false), 150);
       }
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (shutterTimerRef.current) clearTimeout(shutterTimerRef.current);
+    };
+  }, []);
 
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -115,16 +126,30 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
             playsInline 
             className="flex-1 object-cover"
           />
+
+          <AnimatePresence>
+            {showShutter && (
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="fixed inset-0 bg-white z-[60] pointer-events-none"
+              />
+            )}
+          </AnimatePresence>
           <div className="p-8 bg-zinc-900 flex justify-between items-center">
             <button 
               onClick={stopCamera}
               className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm"
+              aria-label={captureCount > 0 ? "Stop camera and finish" : "Cancel and stop camera"}
             >
               {captureCount > 0 ? `Finish (${captureCount})` : 'Cancel'}
             </button>
             <button
               onClick={takePhoto}
               className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform"
+              aria-label="Take photo"
             />
             <div className="w-16" /> {/* Spacer */}
           </div>
