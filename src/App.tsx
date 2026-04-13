@@ -427,6 +427,7 @@ export default function App() {
                   onClick={checkGoogleStatus}
                   className="p-1 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
                   title="Retry connection check"
+                  aria-label="Retry connection check"
                 >
                   <RefreshCw className="w-3 h-3" />
                 </button>
@@ -460,7 +461,7 @@ export default function App() {
               <div className="space-y-4">
                 <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Monday Job Board ID</label>
+                    <label htmlFor="board-id" className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Monday Job Board ID</label>
                     <div className="flex gap-2 items-center">
                       {serverConfig.hasApiKey ? (
                         <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1"><CheckCircle className="w-2 h-2" /> API LINKED</span>
@@ -471,6 +472,7 @@ export default function App() {
                             onClick={checkConfig}
                             className="p-1 hover:bg-zinc-800 rounded transition-colors"
                             title="Refresh Connection"
+                            aria-label="Refresh connection"
                           >
                             <RefreshCw className="w-3 h-3 text-zinc-500" />
                           </button>
@@ -481,6 +483,7 @@ export default function App() {
                   </div>
                   <div className="relative">
                     <input 
+                      id="board-id"
                       type="text" 
                       value={boardId}
                       onChange={(e) => setBoardId(e.target.value)}
@@ -589,6 +592,7 @@ export default function App() {
                         <button 
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
                           className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
+                          aria-label="Remove image"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -749,17 +753,26 @@ export default function App() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Field Notes (Optional - Syncs as Comment)</label>
-                    <textarea 
-                      value={currentRecord.notes || ''}
-                      onChange={(e) => {
-                        const updated = { ...currentRecord, notes: e.target.value };
-                        setCurrentRecord(updated);
-                        saveSurvey(updated as SurveyRecord);
-                      }}
-                      placeholder="Add site observations..."
-                      className="w-full h-24 bg-black border border-zinc-700 rounded-lg px-4 py-2 text-sm focus:border-emerald-500 outline-none transition-colors resize-none"
-                    />
+                    <label htmlFor="field-notes" className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Field Notes (Optional - Syncs as Comment)</label>
+                    <div className="relative">
+                      <textarea
+                        id="field-notes"
+                        value={currentRecord.notes || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val.length <= 500) {
+                            const updated = { ...currentRecord, notes: val };
+                            setCurrentRecord(updated);
+                            saveSurvey(updated as SurveyRecord);
+                          }
+                        }}
+                        placeholder="Add site observations..."
+                        className="w-full h-24 bg-black border border-zinc-700 rounded-lg px-4 py-2 pr-12 text-sm focus:border-emerald-500 outline-none transition-colors resize-none"
+                      />
+                      <div className="absolute bottom-2 right-3 text-[10px] text-zinc-500 font-mono pointer-events-none">
+                        {(currentRecord.notes || '').length}/500
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -859,13 +872,14 @@ export default function App() {
 
               <div className="space-y-3">
                 {history.map(record => (
-                  <div 
+                  <button
                     key={record.id}
+                    type="button"
                     onClick={() => {
                       setCurrentRecord(record);
                       setView('review');
                     }}
-                    className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-4 cursor-pointer hover:border-zinc-600 transition-colors"
+                    className="w-full text-left p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-4 cursor-pointer hover:border-zinc-600 transition-colors"
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0">
                       <img src={record.images?.[0]} className="w-full h-full object-cover" />
@@ -883,12 +897,21 @@ export default function App() {
                       <p className="text-[10px] text-zinc-600 font-mono mt-0.5">BOARD: {record.boardId}</p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-zinc-700" />
-                  </div>
+                  </button>
                 ))}
                 {history.length === 0 && (
-                  <div className="py-12 text-center text-zinc-500">
-                    <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No surveys captured yet.</p>
+                  <div className="py-12 text-center text-zinc-500 space-y-6">
+                    <div className="space-y-4">
+                      <History className="w-12 h-12 mx-auto opacity-20" />
+                      <p>No surveys captured yet.</p>
+                    </div>
+                    <button
+                      onClick={() => setView('home')}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all active:scale-95"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Start New Survey</span>
+                    </button>
                   </div>
                 )}
               </div>
