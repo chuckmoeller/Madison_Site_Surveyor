@@ -1,0 +1,3 @@
+## 2025-05-14 - Parallelize Batch Image Analysis
+**Learning:** Sequential processing of multiple images during site surveys created a significant performance bottleneck. Since each image requires an independent Gemini AI analysis (~1.5s) and a database save (~50ms), a sequential loop scales linearly with the number of images. Parallelizing these operations with `Promise.all` allows the application to process the entire batch in the time it takes for the slowest single image to complete.
+**Action:** Always prefer `Promise.all` or `Promise.allSettled` for batch operations involving network requests or database I/O to maximize throughput and improve perceived user performance.
