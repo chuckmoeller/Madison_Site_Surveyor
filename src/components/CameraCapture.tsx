@@ -68,7 +68,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
         reader.onloadend = () => {
           onCapture(reader.result as string);
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(file as Blob);
       });
     }
   };
