@@ -1,0 +1,3 @@
+## 2025-04-17 - Asynchronous Image Processing Parallelization
+**Learning:** Sequential image processing using Gemini AI and IndexedDB was a significant bottleneck during batch uploads. Parallelizing these operations with `Promise.all` reduced latency by ~67% for a typical 3-image session. standalone benchmarking using `node --experimental-strip-types` is an effective way to quantify gains when production dependencies (like Gemini API keys) are unavailable in the test environment.
+**Action:** Always check for `for...of` loops containing `await` on independent service calls and consider `Promise.all` for concurrency. Use mock latency scripts to verify performance improvements.
