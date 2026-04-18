@@ -216,10 +216,14 @@ export default function App() {
     
     setIsProcessing(true);
     try {
-      const createdRecords: SurveyRecord[] = [];
-
-      for (const img of sessionImages) {
+      // Parallelize image processing to significantly reduce wait time for batch uploads.
+      // Moving from sequential processing to parallel execution with Promise.all
+      // reduces total analysis time from O(N * (AI + DB)) to O(max(AI) + DB).
+      // Estimated performance gain for 3 images: ~67% reduction in processing time.
+      const processingPromises = sessionImages.map(async (img) => {
         let rawData: any = {};
+        let data: any = {};
+
         try {
           if (type === 'ISC') {
             rawData = await processNameplate([img]);
@@ -227,7 +231,6 @@ export default function App() {
             rawData = await processRoofImage([img]);
           }
 
-          let data: any = {};
           if (rawData.values && rawData.values.length > 0) {
             const row = rawData.values[0];
             if (type === 'ISC') {
@@ -264,35 +267,27 @@ export default function App() {
               };
             }
           }
-
-          const record: SurveyRecord = {
-            id: crypto.randomUUID(),
-            type,
-            data,
-            images: sessionImages, // Attach all session images for context
-            boardId,
-            status: 'pending',
-            timestamp: Date.now()
-          };
-
-          await saveSurvey(record);
-          createdRecords.push(record);
         } catch (imgErr) {
           console.error("Individual image processing failed:", imgErr);
-          // Save a record with no data if analysis fails for one image
-          const record: SurveyRecord = {
-            id: crypto.randomUUID(),
-            type,
-            data: {},
-            images: sessionImages, // Attach all session images for context
-            boardId,
-            status: 'pending',
-            timestamp: Date.now()
-          };
-          await saveSurvey(record);
-          createdRecords.push(record);
+          // We intentionally fall through to save a partial record if AI analysis fails,
+          // ensuring the user doesn't lose their captured image session.
         }
-      }
+
+        const record: SurveyRecord = {
+          id: crypto.randomUUID(),
+          type,
+          data,
+          images: sessionImages, // Attach all session images for context
+          boardId,
+          status: 'pending',
+          timestamp: Date.now()
+        };
+
+        await saveSurvey(record);
+        return record;
+      });
+
+      const createdRecords = await Promise.all(processingPromises);
 
       setSessionImages([]);
       if (createdRecords.length === 1) {
