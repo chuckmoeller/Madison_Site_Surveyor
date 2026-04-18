@@ -1,0 +1,3 @@
+## 2025-05-15 - Parallelizing AI Analysis in Batch Uploads
+**Learning:** In applications where multiple images are processed via external AI APIs (like Gemini), sequential processing creates a significant bottleneck that scales linearly with the number of images. Since these are I/O bound operations, parallelizing them with `Promise.all` provides a massive speedup (~67% for 3 images) without significantly increasing complexity or memory overhead, as the results are individual survey records.
+**Action:** Always check if batch processing loops involve independent I/O bound operations (AI, DB, API) and parallelize them where possible to improve user-perceived performance.
