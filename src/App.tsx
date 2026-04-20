@@ -216,9 +216,9 @@ export default function App() {
     
     setIsProcessing(true);
     try {
-      const createdRecords: SurveyRecord[] = [];
-
-      for (const img of sessionImages) {
+      // BOLT OPTIMIZATION: Parallelize Gemini AI analysis and database saves for multiple images.
+      // This reduces total processing time from O(N) to O(1) in ideal network/API conditions.
+      const processImage = async (img: string): Promise<SurveyRecord> => {
         let rawData: any = {};
         try {
           if (type === 'ISC') {
@@ -276,10 +276,10 @@ export default function App() {
           };
 
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         } catch (imgErr) {
           console.error("Individual image processing failed:", imgErr);
-          // Save a record with no data if analysis fails for one image
+          // Save a record with no data if analysis fails for one image to ensure context is preserved
           const record: SurveyRecord = {
             id: crypto.randomUUID(),
             type,
@@ -290,9 +290,11 @@ export default function App() {
             timestamp: Date.now()
           };
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         }
-      }
+      };
+
+      const createdRecords = await Promise.all(sessionImages.map(img => processImage(img)));
 
       setSessionImages([]);
       if (createdRecords.length === 1) {
