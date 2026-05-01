@@ -859,13 +859,14 @@ export default function App() {
 
               <div className="space-y-3">
                 {history.map(record => (
-                  <div 
+                  <button
                     key={record.id}
+                    type="button"
                     onClick={() => {
                       setCurrentRecord(record);
                       setView('review');
                     }}
-                    className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-4 cursor-pointer hover:border-zinc-600 transition-colors"
+                    className="w-full text-left p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-4 cursor-pointer hover:border-zinc-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0">
                       <img src={record.images?.[0]} className="w-full h-full object-cover" />
@@ -883,12 +884,19 @@ export default function App() {
                       <p className="text-[10px] text-zinc-600 font-mono mt-0.5">BOARD: {record.boardId}</p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-zinc-700" />
-                  </div>
+                  </button>
                 ))}
                 {history.length === 0 && (
-                  <div className="py-12 text-center text-zinc-500">
-                    <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                  <div className="py-12 text-center text-zinc-500 flex flex-col items-center gap-4">
+                    <History className="w-12 h-12 opacity-20" />
                     <p>No surveys captured yet.</p>
+                    <button
+                      onClick={() => setView('home')}
+                      className="mt-2 flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-all active:scale-95 shadow-lg shadow-emerald-900/20"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Start New Survey</span>
+                    </button>
                   </div>
                 )}
               </div>
