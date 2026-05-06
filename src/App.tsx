@@ -576,8 +576,13 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({sessionImages.length})</span>
                     <button 
-                      onClick={() => setSessionImages([])}
-                      className="text-[10px] text-red-500 hover:underline"
+                      onClick={() => {
+                        if (window.confirm('Clear all captured photos? This cannot be undone.')) {
+                          setSessionImages([]);
+                        }
+                      }}
+                      aria-label="Clear all captured photos"
+                      className="text-[10px] text-red-500 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500 rounded px-1"
                     >
                       Clear All
                     </button>
@@ -588,9 +593,10 @@ export default function App() {
                         <img src={img} alt={`Capture ${i}`} className="w-full h-full object-cover" />
                         <button 
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
-                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
+                          aria-label="Remove image"
+                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                         >
-                          <X className="w-3 h-3" />
+                          <X className="w-3 h-3 text-white" />
                         </button>
                       </div>
                     ))}
@@ -859,13 +865,13 @@ export default function App() {
 
               <div className="space-y-3">
                 {history.map(record => (
-                  <div 
+                  <button
                     key={record.id}
                     onClick={() => {
                       setCurrentRecord(record);
                       setView('review');
                     }}
-                    className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-4 cursor-pointer hover:border-zinc-600 transition-colors"
+                    className="w-full text-left p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center gap-4 cursor-pointer hover:border-zinc-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                   >
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0">
                       <img src={record.images?.[0]} className="w-full h-full object-cover" />
@@ -883,12 +889,19 @@ export default function App() {
                       <p className="text-[10px] text-zinc-600 font-mono mt-0.5">BOARD: {record.boardId}</p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-zinc-700" />
-                  </div>
+                  </button>
                 ))}
                 {history.length === 0 && (
-                  <div className="py-12 text-center text-zinc-500">
+                  <div className="py-12 text-center text-zinc-500 bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-800">
                     <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No surveys captured yet.</p>
+                    <p className="mb-6">No surveys captured yet.</p>
+                    <button
+                      onClick={() => setView('home')}
+                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-500 transition-all active:scale-95"
+                    >
+                      <Plus className="w-5 h-5" />
+                      Start New Survey
+                    </button>
                   </div>
                 )}
               </div>
