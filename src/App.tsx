@@ -424,9 +424,11 @@ export default function App() {
                   Google Not Configured
                 </div>
                 <button 
+                  type="button"
                   onClick={checkGoogleStatus}
                   className="p-1 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
                   title="Retry connection check"
+                  aria-label="Retry connection check"
                 >
                   <RefreshCw className="w-3 h-3" />
                 </button>
@@ -468,9 +470,11 @@ export default function App() {
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] text-red-500 font-bold flex items-center gap-1"><AlertCircle className="w-2 h-2" /> NO API KEY</span>
                           <button 
+                            type="button"
                             onClick={checkConfig}
                             className="p-1 hover:bg-zinc-800 rounded transition-colors"
                             title="Refresh Connection"
+                            aria-label="Refresh connection configuration"
                           >
                             <RefreshCw className="w-3 h-3 text-zinc-500" />
                           </button>
@@ -501,6 +505,7 @@ export default function App() {
                     <div className="space-y-2">
                       <p className="text-[10px] text-amber-500/70 italic">Please enter a Board ID to enable capture modules.</p>
                       <button 
+                        type="button"
                         onClick={() => setBoardId('18401101635')}
                         className="text-[10px] text-zinc-500 hover:text-emerald-500 underline transition-colors"
                       >
@@ -576,7 +581,12 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({sessionImages.length})</span>
                     <button 
-                      onClick={() => setSessionImages([])}
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to clear all captured photos?")) {
+                          setSessionImages([]);
+                        }
+                      }}
                       className="text-[10px] text-red-500 hover:underline"
                     >
                       Clear All
@@ -587,8 +597,10 @@ export default function App() {
                       <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-800">
                         <img src={img} alt={`Capture ${i}`} className="w-full h-full object-cover" />
                         <button 
+                          type="button"
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
                           className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
+                          aria-label="Remove photo"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -721,6 +733,7 @@ export default function App() {
                     <div className="flex items-center justify-between">
                       <label className="text-[10px] text-zinc-500 uppercase font-mono tracking-wider">Target Board ID</label>
                       <button 
+                        type="button"
                         onClick={() => setIsEditingBoardId(!isEditingBoardId)}
                         className="text-[10px] text-emerald-500 hover:underline"
                       >
@@ -928,7 +941,7 @@ function ModuleButton({ icon, title, description, onClick, color, disabled, load
 
   return (
     <button 
-      onClick={onClick}
+      type="button" onClick={onClick}
       disabled={disabled || loading}
       className={`group p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-6 text-left transition-all hover:border-zinc-600 active:scale-[0.98] ${disabled || loading ? 'opacity-50 cursor-not-allowed' : ''}`}
     >

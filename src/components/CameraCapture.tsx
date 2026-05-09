@@ -88,7 +88,9 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
       {!isCapturing ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
+            type="button"
             onClick={startCamera}
+            aria-label="Start live camera"
             className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-emerald-500/50 transition-colors group active:scale-95"
           >
             <div className="p-4 bg-zinc-800 rounded-full group-hover:bg-emerald-500/10 transition-colors">
@@ -98,7 +100,9 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
           </button>
 
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
+            aria-label="Upload image from device"
             className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-colors group active:scale-95"
           >
             <div className="p-4 bg-zinc-800 rounded-full group-hover:bg-blue-500/10 transition-colors">
@@ -117,13 +121,17 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
           />
           <div className="p-8 bg-zinc-900 flex justify-between items-center">
             <button 
+              type="button"
               onClick={stopCamera}
+              aria-label={captureCount > 0 ? `Finish and save ${captureCount} captures` : "Cancel camera capture"}
               className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm"
             >
               {captureCount > 0 ? `Finish (${captureCount})` : 'Cancel'}
             </button>
             <button
+              type="button"
               onClick={takePhoto}
+              aria-label="Take photo"
               className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform"
             />
             <div className="w-16" /> {/* Spacer */}

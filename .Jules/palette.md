@@ -1,0 +1,3 @@
+## 2026-05-09 - Accessibility & UX Polish
+**Learning:** Adding explicit `type="button"` to all buttons and providing `aria-label` for icon-only or visually ambiguous buttons significantly improves screen reader accessibility and prevents accidental form submissions in complex React layouts. Implementing confirmation dialogs for destructive actions like "Clear All" is a critical UX safeguard in mobile field applications.
+**Action:** Always verify that every `<button>` element has a `type` attribute and a clear accessible name (either via text content or `aria-label`). Ensure destructive actions are gated by confirmation.
