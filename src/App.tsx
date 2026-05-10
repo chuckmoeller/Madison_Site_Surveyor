@@ -576,8 +576,13 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({sessionImages.length})</span>
                     <button 
-                      onClick={() => setSessionImages([])}
-                      className="text-[10px] text-red-500 hover:underline"
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("Clear all captured photos? This cannot be undone.")) {
+                          setSessionImages([]);
+                        }
+                      }}
+                      className="text-[10px] text-red-500 hover:underline focus-visible:ring-2 focus-visible:ring-red-500 outline-none rounded px-1"
                     >
                       Clear All
                     </button>
@@ -587,8 +592,10 @@ export default function App() {
                       <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-800">
                         <img src={img} alt={`Capture ${i}`} className="w-full h-full object-cover" />
                         <button 
+                          type="button"
+                          aria-label="Remove photo"
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
-                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
+                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -597,9 +604,10 @@ export default function App() {
                   </div>
                   
                   <button
+                    type="button"
                     onClick={() => handleAnalyze(view === 'isc' ? 'ISC' : 'EFS')}
                     disabled={isProcessing}
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-2xl font-bold text-lg transition-all active:scale-95 flex items-center justify-center gap-3"
+                    className="w-full py-4 bg-emerald-600 text-white hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-2xl font-bold text-lg transition-all active:scale-95 flex items-center justify-center gap-3 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                   >
                     {isProcessing ? (
                       <>
@@ -766,9 +774,10 @@ export default function App() {
 
               {currentRecord.status === 'pending' && (
                 <button
+                  type="button"
                   onClick={() => handleSync(currentRecord as SurveyRecord)}
                   disabled={!isOnline || isSyncing}
-                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-2xl font-bold text-lg transition-all active:scale-95 flex items-center justify-center gap-3"
+                  className="w-full py-4 bg-emerald-600 text-white hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-2xl font-bold text-lg transition-all active:scale-95 flex items-center justify-center gap-3 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                 >
                   {isSyncing ? (
                     <>
@@ -796,13 +805,14 @@ export default function App() {
                       <span>Survey Complete</span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         setSyncCompleted(false);
                         setCurrentRecord(null);
                         // Go back to the module they were using
                         setView(currentRecord.type === 'ISC' ? 'isc' : 'efs');
                       }}
-                      className="py-4 bg-emerald-600 hover:bg-emerald-500 rounded-2xl font-bold text-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                      className="py-4 bg-emerald-600 text-white hover:bg-emerald-500 rounded-2xl font-bold text-lg transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                     >
                       <Plus className="w-5 h-5" />
                       <span>Edit Survey</span>
