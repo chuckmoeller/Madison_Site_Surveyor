@@ -88,8 +88,10 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
       {!isCapturing ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
+            type="button"
             onClick={startCamera}
-            className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-emerald-500/50 transition-colors group active:scale-95"
+            className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-emerald-500/50 transition-colors group active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
+            aria-label="Start live camera capture"
           >
             <div className="p-4 bg-zinc-800 rounded-full group-hover:bg-emerald-500/10 transition-colors">
               <Camera className="w-8 h-8 text-zinc-400 group-hover:text-emerald-500" />
@@ -98,8 +100,10 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
           </button>
 
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-colors group active:scale-95"
+            className="h-48 bg-zinc-900 border-2 border-dashed border-zinc-700 rounded-2xl flex flex-col items-center justify-center gap-4 hover:border-blue-500/50 transition-colors group active:scale-95 focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+            aria-label="Upload images from device"
           >
             <div className="p-4 bg-zinc-800 rounded-full group-hover:bg-blue-500/10 transition-colors">
               <ImageIcon className="w-8 h-8 text-zinc-400 group-hover:text-blue-500" />
@@ -117,18 +121,22 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, label, 
           />
           <div className="p-8 bg-zinc-900 flex justify-between items-center">
             <button 
+              type="button"
               onClick={stopCamera}
-              className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm"
+              className="px-6 py-2 bg-zinc-800 text-white rounded-full font-bold text-sm focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
+              aria-label={captureCount > 0 ? `Stop camera and finish with ${captureCount} photos` : "Cancel camera and return"}
             >
               {captureCount > 0 ? `Finish (${captureCount})` : 'Cancel'}
             </button>
             <button
+              type="button"
               onClick={takePhoto}
-              className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform"
+              className="w-20 h-20 bg-white rounded-full border-4 border-zinc-300 active:scale-90 transition-transform focus-visible:ring-4 focus-visible:ring-emerald-500 outline-none"
+              aria-label="Take photo"
             />
-            <div className="w-16" /> {/* Spacer */}
+            <div className="w-16" aria-hidden="true" /> {/* Spacer */}
           </div>
-          <canvas ref={canvasRef} className="hidden" />
+          <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
         </div>
       )}
     </div>

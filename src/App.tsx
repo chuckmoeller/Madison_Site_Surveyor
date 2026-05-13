@@ -576,8 +576,14 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({sessionImages.length})</span>
                     <button 
-                      onClick={() => setSessionImages([])}
-                      className="text-[10px] text-red-500 hover:underline"
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to clear all captured photos?")) {
+                          setSessionImages([]);
+                        }
+                      }}
+                      className="text-[10px] text-red-500 hover:underline focus-visible:ring-1 focus-visible:ring-red-500 outline-none rounded px-1"
+                      aria-label="Clear all captured photos"
                     >
                       Clear All
                     </button>
