@@ -423,10 +423,9 @@ async function startServer() {
         const updateData = await updateResponse.json();
         const updateId = updateData.data?.create_update?.id;
 
-        // Upload images to the update if provided
+        // Upload images to the update if provided in parallel
         if (images && Array.isArray(images) && images.length > 0 && updateId) {
-          for (let i = 0; i < images.length; i++) {
-            const image = images[i];
+          await Promise.all(images.map(async (image, i) => {
             try {
               // Convert base64 to Buffer
               const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
@@ -451,7 +450,7 @@ async function startServer() {
             } catch (imgErr) {
               console.error(`Image ${i + 1} upload failed:`, imgErr);
             }
-          }
+          }));
         }
       }
 
