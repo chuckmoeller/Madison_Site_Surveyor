@@ -424,9 +424,11 @@ export default function App() {
                   Google Not Configured
                 </div>
                 <button 
+                  type="button"
                   onClick={checkGoogleStatus}
-                  className="p-1 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
+                  className="p-1 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 focus-visible:ring-2 focus-visible:ring-red-500 outline-none"
                   title="Retry connection check"
+                  aria-label="Retry Google connection check"
                 >
                   <RefreshCw className="w-3 h-3" />
                 </button>
@@ -468,9 +470,11 @@ export default function App() {
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] text-red-500 font-bold flex items-center gap-1"><AlertCircle className="w-2 h-2" /> NO API KEY</span>
                           <button 
+                            type="button"
                             onClick={checkConfig}
-                            className="p-1 hover:bg-zinc-800 rounded transition-colors"
+                            className="p-1 hover:bg-zinc-800 rounded transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
                             title="Refresh Connection"
+                            aria-label="Refresh Monday connection"
                           >
                             <RefreshCw className="w-3 h-3 text-zinc-500" />
                           </button>
@@ -576,8 +580,13 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono tracking-widest uppercase text-zinc-500">Captured Photos ({sessionImages.length})</span>
                     <button 
-                      onClick={() => setSessionImages([])}
-                      className="text-[10px] text-red-500 hover:underline"
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to clear all captured photos?")) {
+                          setSessionImages([]);
+                        }
+                      }}
+                      className="text-[10px] text-red-500 hover:underline focus-visible:ring-2 focus-visible:ring-red-500 outline-none rounded px-1"
                     >
                       Clear All
                     </button>
@@ -587,8 +596,10 @@ export default function App() {
                       <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-800">
                         <img src={img} alt={`Capture ${i}`} className="w-full h-full object-cover" />
                         <button 
+                          type="button"
                           onClick={() => setSessionImages(prev => prev.filter((_, idx) => idx !== i))}
-                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors"
+                          aria-label="Remove photo"
+                          className="absolute top-1 right-1 p-1 bg-black/50 rounded-full hover:bg-red-500 transition-colors focus-visible:ring-2 focus-visible:ring-red-500 outline-none"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -886,9 +897,19 @@ export default function App() {
                   </div>
                 ))}
                 {history.length === 0 && (
-                  <div className="py-12 text-center text-zinc-500">
-                    <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                    <p>No surveys captured yet.</p>
+                  <div className="py-12 text-center text-zinc-500 space-y-6">
+                    <div className="flex flex-col items-center">
+                      <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                      <p>No surveys captured yet.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setView('home')}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Start New Survey</span>
+                    </button>
                   </div>
                 )}
               </div>
