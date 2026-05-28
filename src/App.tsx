@@ -216,18 +216,19 @@ export default function App() {
     
     setIsProcessing(true);
     try {
-      const createdRecords: SurveyRecord[] = [];
+      // ⚡ Bolt: Parallelize AI analysis for multiple images to improve performance
+      // This reduces total processing time from O(n) to O(max(single_analysis))
+      const createdRecords = await Promise.all(sessionImages.map(async (img) => {
+        let data: any = {};
 
-      for (const img of sessionImages) {
-        let rawData: any = {};
         try {
+          let rawData: any = {};
           if (type === 'ISC') {
             rawData = await processNameplate([img]);
           } else if (type === 'EFS') {
             rawData = await processRoofImage([img]);
           }
 
-          let data: any = {};
           if (rawData.values && rawData.values.length > 0) {
             const row = rawData.values[0];
             if (type === 'ISC') {
@@ -264,35 +265,24 @@ export default function App() {
               };
             }
           }
-
-          const record: SurveyRecord = {
-            id: crypto.randomUUID(),
-            type,
-            data,
-            images: sessionImages, // Attach all session images for context
-            boardId,
-            status: 'pending',
-            timestamp: Date.now()
-          };
-
-          await saveSurvey(record);
-          createdRecords.push(record);
         } catch (imgErr) {
           console.error("Individual image processing failed:", imgErr);
-          // Save a record with no data if analysis fails for one image
-          const record: SurveyRecord = {
-            id: crypto.randomUUID(),
-            type,
-            data: {},
-            images: sessionImages, // Attach all session images for context
-            boardId,
-            status: 'pending',
-            timestamp: Date.now()
-          };
-          await saveSurvey(record);
-          createdRecords.push(record);
+          // data remains empty {} as fallback
         }
-      }
+
+        const record: SurveyRecord = {
+          id: crypto.randomUUID(),
+          type,
+          data,
+          images: sessionImages, // Attach all session images for context
+          boardId,
+          status: 'pending',
+          timestamp: Date.now()
+        };
+
+        await saveSurvey(record);
+        return record;
+      }));
 
       setSessionImages([]);
       if (createdRecords.length === 1) {
