@@ -216,9 +216,8 @@ export default function App() {
     
     setIsProcessing(true);
     try {
-      const createdRecords: SurveyRecord[] = [];
-
-      for (const img of sessionImages) {
+      // ⚡ BOLT: Process all images concurrently using Promise.all to reduce AI extraction latency
+      const createdRecords = await Promise.all(sessionImages.map(async (img) => {
         let rawData: any = {};
         try {
           if (type === 'ISC') {
@@ -276,7 +275,7 @@ export default function App() {
           };
 
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         } catch (imgErr) {
           console.error("Individual image processing failed:", imgErr);
           // Save a record with no data if analysis fails for one image
@@ -290,9 +289,9 @@ export default function App() {
             timestamp: Date.now()
           };
           await saveSurvey(record);
-          createdRecords.push(record);
+          return record;
         }
-      }
+      }));
 
       setSessionImages([]);
       if (createdRecords.length === 1) {

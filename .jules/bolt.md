@@ -1,0 +1,3 @@
+## 2025-05-15 - Parallelizing AI Analysis
+**Learning:** Processing multiple images sequentially in a loop (using `await` inside `for...of`) creates a linear performance bottleneck as the number of images increases. Parallelizing these network-bound and AI processing tasks with `Promise.all` can significantly reduce total latency, often achieving near O(1) time relative to the batch size, limited only by API rate limits and client bandwidth.
+**Action:** Always identify sequential loops that perform asynchronous network or AI operations and consider parallelizing them with `Promise.all` if order doesn't matter or can be handled later.
